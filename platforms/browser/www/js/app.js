@@ -1,30 +1,30 @@
 
 var app = {};
 
+app.user = { name:'', id:2, isAdmin:false };
+
 app.pages = {
 
     home: {
         template:
-        `
-            <div class="app-page" id="page-home">
-                <ul id="lista-medicoes"></ul>
-            </div>
-        `,
+        '<div class="app-page" id="page-home">'+
+                '<ul id="lista-medicoes"></ul>'+
+            '</div>'
+        ,
         initialize: function(){
 
             var item_template = 
-            `
-                <li class="item">
-                    <div class="title">{{sensor_nome}}</div>
-                    <div class="infos">
-                        <div class="info info-chuva">{{chuva}}</div>
-                        <div class="info info-temp">{{temp}}</div>
-                    </div>
-                    <div class="time">{{time}}</div>
-                </li>
-            `;
+                '<li class="item">'+
+                    '<div class="title">{{sensor_nome}}</div>'+
+                    '<div class="infos">'+
+                        '<div class="info info-chuva">{{chuva}}</div>'+
+                        '<div class="info info-temp">{{temp}}</div>'+
+                    '</div>'+
+                    '<div class="time">{{time}}</div>'+
+                '</li>'
+            ;
 
-            apiConnection.listMedicoes(null, function(result){
+            apiConnection.listMedicoes({userId:app.user.id}, function(result){
                 var medicoes = result;
                 var html = '';
                 for (var i = 0; i < medicoes.length; i++)
@@ -53,7 +53,6 @@ app.pages.show = function(args){
     var html = page.template;
     $('#app-content').html(html);
 
-    console.log(page);
     if (page.initialize)
         page.initialize();
 }
