@@ -37,7 +37,7 @@
     * Create your own at http://cspisawesome.com
     -->
     <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
-
+    <!-- <link href="https://fonts.googleapis.com/css?family=Encode+Sans" rel="stylesheet" type="text/css" /> -->
     <link rel="stylesheet" type="text/css" href="css/index.css" />
     <title>Hello World</title>
 </head>
@@ -56,13 +56,18 @@
             <span class="btn-open-menu"></span>
             <div class="logo"></div>
         </div>
-        <div id="app-content">
-
+        <div id="app-content"></div>
+        <div id="app-menu" class="hidden">
+            <ul class="menu-itens">
+                <li data-page="home">Medições</li>
+                <li data-page="configs">Configurações</li>
+                <li data-page="logout">Sair</li>
+            </ul>
         </div>
     </div>
     <script type="text/javascript" src="cordova.js"></script>
     <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-    <script type="text/javascript" src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <!-- <script type="text/javascript" src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script> -->
     <script type="text/javascript" src="js/index.js"></script>
     <script type="text/javascript" src="js/api_connection.js"></script>
     <script type="text/javascript" src="js/app.js"></script>

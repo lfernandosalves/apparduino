@@ -52,4 +52,15 @@ var phonegap_app = {
 
 function initializeApp(){
     app.pages.show('home');
+
+    $('.btn-open-menu').click(function(e){
+        e.stopPropagation();
+        $('#app-menu').removeClass('hidden');
+    });
+
+    $('#main').click(function(){ $('#app-menu').addClass('hidden'); });
+
+    $('#app-menu').find('.menu-itens').find('li').click(function(e){
+        e.stopPropagation();
+    });
 }

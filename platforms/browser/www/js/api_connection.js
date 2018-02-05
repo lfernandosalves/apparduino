@@ -24,7 +24,7 @@ var apiConnection =
     },
 
     listMedicoes: function(args, cb){
-        apiConnection.get(apiUrl + '/api/medicoes/list', cb);
+        apiConnection.get(apiConnection.apiUrl + '/api/medicoes/list', cb);
     }
 
 
