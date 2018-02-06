@@ -1,8 +1,8 @@
 var apiConnection = 
 {
 
-    apiUrl: 'http://localhost:5000',
-    // apiUrl:'http://arduinosensort-com.umbler.net',
+    //apiUrl: 'http://localhost:5000',
+    apiUrl:'http://arduinosensort-com.umbler.net',
 
     get: function(args, cb){
         if (!args) return null;
@@ -25,11 +25,13 @@ var apiConnection =
         });
     },
 
+    login: function(username, password, cb){
+        setTimeout(function(){ cb({ id:2, name:'', isAdmin:false }); }, 3000);
+    },
+
     listMedicoes: function(args, cb){
         var url = apiConnection.apiUrl + '/api/medicoes/list';
         if (args.userId) url += '?user=' + args.userId;
         apiConnection.get(url, cb);
     }
-
-
 };

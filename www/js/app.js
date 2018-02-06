@@ -1,13 +1,11 @@
 
 var app = {};
 
-app.user = { name:'', id:2, isAdmin:false };
-
 app.pages = {
 
     home: {
         template:
-        '<div class="app-page" id="page-home">'+
+            '<div class="app-page" id="page-home">'+
                 '<ul id="lista-medicoes"></ul>'+
             '</div>'
         ,
@@ -24,7 +22,8 @@ app.pages = {
                 '</li>'
             ;
 
-            apiConnection.listMedicoes({userId:app.user.id}, function(result){
+            var user = app.currentUser();
+            apiConnection.listMedicoes({userId:user.id}, function(result){
                 var medicoes = result;
                 var html = '';
                 for (var i = 0; i < medicoes.length; i++)
@@ -41,9 +40,90 @@ app.pages = {
                 $('#lista-medicoes').html(html);
             });
         }
+    },
+
+    login:
+    {
+        template:
+        '<div class="app-page" id="page-login">'+
+            '<div class="center-div">'+
+            '   <div class="form-login pnl-login">'+
+            '       <div class="login-logo"></div>'+
+            '       <input type="text" id="txt-username" placeholder="Digite seu usuário" />'+
+            '       <input type="password" id="txt-pass" placeholder="Digite sua senha" />'+
+            '       <div class="login-err">Usuário e/ou senha incorretos</div>'+
+            '       <div class="btn-login">Entrar</div>'+
+            '   </div>'+
+            '   <div class="pnl-login pnl-loading">'+
+            '       <div class="loader"></div>'+
+            '       <div class="loading-text">Carregando...</div>'+
+            '   </div>'+
+            '</div>'+
+        '</div>',
+
+        initialize:function(){
+            localStorage.removeItem('user');
+
+            var user = app.currentUser();
+            if (!user){
+                $('.pnl-loading').fadeOut('fast', function(){
+
+                    $('.form-login').fadeIn('fast');
+                });
+            }else{
+                app.pages.show('home');
+            }
+           
+            $('.btn-login').click(function(){
+                $('.form-login').fadeOut('fast', function(){
+                    $('.pnl-loading').fadeIn('fast');
+
+                    tryLogin(function(success){
+                        if (!success){
+                            $('.login-err').show();
+                            setTimeout(function() { $('.login-err').fadeOut(); }, 5000); 
+                            $('#txt-username').val('');
+                            $('#txt-pass').val('');
+                            $('.pnl-loading').fadeOut('fast', function(){
+                                $('.form-login').fadeIn('fast');
+                            });
+                        }
+                        else
+                            app.pages.show('home');
+                    });
+                });
+            });
+
+            function tryLogin(cb){
+                var username = $('#txt-username').val();
+                var password = $('#txt-pass').val();
+
+                if (!username || username == '' || !password || password == ''){
+                    cb(false);
+                    return;
+                }
+
+                apiConnection.login(username, password, function(userResponse){
+                    if (userResponse && userResponse.id > 0){
+                        app.currentUser(userResponse);
+                        cb(true);
+                    }
+                    else
+                        cb(false);
+                });
+            }
+        }
     }
+    
 };
 
+app.currentUser = function(value){
+
+    if (value == undefined)
+        return localStorage.getItem('user');
+
+    localStorage.setItem('user', value);
+}
 
 app.pages.show = function(args){
     if (typeof args == 'string')
@@ -51,10 +131,17 @@ app.pages.show = function(args){
 
     var page = app.pages[args.page];
     var html = page.template;
-    $('#app-content').html(html);
 
-    if (page.initialize)
-        page.initialize();
+    $('#app-content').fadeOut('fast', function(){
+        $('#app-content').html(html);
+        if (args.page == 'login') $('#app-header').hide();
+        else $('#app-header').show();
+
+        $('#app-content').fadeIn('fast');
+        
+        if (page.initialize)
+            page.initialize();
+    });
 }
 
 

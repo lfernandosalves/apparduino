@@ -51,7 +51,7 @@ var phonegap_app = {
 
 
 function initializeApp(){
-    app.pages.show('home');
+    app.pages.show('login');
 
     $('.btn-open-menu').click(function(e){
         e.stopPropagation();
