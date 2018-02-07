@@ -120,9 +120,14 @@ app.pages = {
 app.currentUser = function(value){
 
     if (value == undefined)
-        return localStorage.getItem('user');
+        return localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : localStorage.getItem('user');
 
-    localStorage.setItem('user', value);
+    localStorage.setItem('user', JSON.stringify(value));
+}
+
+app.logout = function(){
+    localStorage.removeItem('user');
+    app.pages.show('login');
 }
 
 app.pages.show = function(args){

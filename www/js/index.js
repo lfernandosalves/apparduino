@@ -61,6 +61,10 @@ function initializeApp(){
     $('#main').click(function(){ $('#app-menu').addClass('hidden'); });
 
     $('#app-menu').find('.menu-itens').find('li').click(function(e){
-        e.stopPropagation();
+        //e.stopPropagation();
+        var action = $(this).data('page');
+
+        if (action == 'logout') app.logout();
+        else app.pages.show(action);
     });
 }
