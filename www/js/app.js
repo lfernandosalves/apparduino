@@ -62,7 +62,7 @@ app.pages = {
         '</div>',
 
         initialize:function(){
-            localStorage.removeItem('user');
+            // localStorage.removeItem('user');
 
             var user = app.currentUser();
             if (!user){
@@ -112,6 +112,49 @@ app.pages = {
                         cb(false);
                 });
             }
+        }
+    },
+
+    userConfigs:
+    {
+        template:''+
+        '<div class="app-page" id="page-user-configs">'+
+        '   <div class="pnl-loading">'+
+        '       <div class="loader"></div>'+
+        '   </div>'+
+        '   <div class="content">'+
+        '       <div class="section"><h2>Notificações</h2>'+
+        '           <div class="row">'+
+        '               <span>Muita chuva</span><div class="input-container"><div class="input" data-value="alerta_chuva_1"><div class="selector"></div></div></div>'+
+        '           </div>'+
+        '           <div class="row">'+
+        '               <span>Chuva moderada</span><div class="input-container"><div class="input" data-value="alerta_chuva_2"><div class="selector"></div></div></div>'+
+        '           </div>'+
+        '           <div class="row">'+
+        '               <span>Pouca chuva</span><div class="input-container"><div class="input" data-value="alerta_chuva_3"><div class="selector"></div></div></div>'+
+        '           </div>'+
+        '           <div class="row">'+
+        '               <span>Temperaturas abaixo de: </span><div class="temp-input-container"><input class="temp-range" type="range" min="0" max="40" step="1" /><input class="temp-val" readonly /></div>'+
+        '           </div>'+
+        '           <div class="row">'+
+        '               <span>Temperaturas acima de: </span><div class="temp-input-container"><input class="temp-range" type="range" min="0" max="40" step="1"><input class="temp-val" readonly /></div>'+
+        '           </div>'+
+        '           <div class="btn-save">Salvar Alterações</div>'+
+        '       </div>'+
+        '   </div>'+
+        '</div>',
+
+        initialize:function()
+        {
+            $('.input').click(function()
+            {
+                $(this).toggleClass('checked');
+            });
+
+            $('.temp-range').on('input', function(){
+                var value = $(this).val();
+                $(this).parent().find('.temp-val').val(value + " ºC");
+            });
         }
     }
     
