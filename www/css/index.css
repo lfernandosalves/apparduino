@@ -437,8 +437,8 @@ h1 {
 
 
 
-#page-user-configs{
-
+#page-user-configs .content{
+    display:none;
 }
 
 

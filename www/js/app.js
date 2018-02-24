@@ -134,10 +134,10 @@ app.pages = {
         '               <span>Pouca chuva</span><div class="input-container"><div class="input" data-value="alerta_chuva_3"><div class="selector"></div></div></div>'+
         '           </div>'+
         '           <div class="row">'+
-        '               <span>Temperaturas abaixo de: </span><div class="temp-input-container"><input class="temp-range" type="range" min="0" max="40" step="1" /><input class="temp-val" readonly /></div>'+
+        '               <span>Temperaturas abaixo de: </span><div class="temp-input-container"><input id="temp_abaixo" class="temp-range" type="range" min="0" max="40" step="1" /><input class="temp-val" readonly /></div>'+
         '           </div>'+
         '           <div class="row">'+
-        '               <span>Temperaturas acima de: </span><div class="temp-input-container"><input class="temp-range" type="range" min="0" max="40" step="1"><input class="temp-val" readonly /></div>'+
+        '               <span>Temperaturas acima de: </span><div class="temp-input-container"><input id="temp_acima" class="temp-range" type="range" min="0" max="40" step="1"><input class="temp-val" readonly /></div>'+
         '           </div>'+
         '           <div class="btn-save">Salvar Alterações</div>'+
         '       </div>'+
@@ -155,6 +155,84 @@ app.pages = {
                 var value = $(this).val();
                 $(this).parent().find('.temp-val').val(value + " ºC");
             });
+
+            $('.btn-save').click(function()
+            {
+                var data = getValues();
+                loading(true);
+                apiConnection.saveUserConfigs(data, function(err, response){
+                    app.pages.show('userConfigs');
+                });
+            });
+
+
+            let user = app.currentUser() || {};
+            let userId = user.id;
+            apiConnection.listUserConfigs({ userId:userId },function(result)
+            {
+                loading(false);
+                if (!result) alert('Ocorreu um erro.');
+                else showData(result);
+            });
+
+            function loading(show)
+            {
+                var pnlContent = $('.content');
+                var pnlLoading = $('.pnl-loading');
+                if (show == true)
+                {
+                    pnlContent.fadeOut('fast');
+                    pnlLoading.fadeIn('fast');
+                }
+                else
+                {
+                    pnlLoading.fadeOut('fast');
+                    pnlContent.fadeIn('fast');
+                }
+            }
+
+            function showData(data)
+            {
+                if (data.alerta_chuva_1 == 1)
+                    $('.input[data-value="alerta_chuva_1"').addClass('checked');
+                else
+                    $('.input[data-value="alerta_chuva_1"').removeClass('checked');
+
+                if (data.alerta_chuva_2 == 1)
+                    $('.input[data-value="alerta_chuva_2"').addClass('checked');
+                else
+                    $('.input[data-value="alerta_chuva_2"').removeClass('checked');
+
+                if (data.alerta_chuva_3 == 1)
+                    $('.input[data-value="alerta_chuva_3"').addClass('checked');
+                else
+                    $('.input[data-value="alerta_chuva_3"').removeClass('checked');
+
+                if (!isNaN(data.alerta_temperatura_abaixo) && data.alerta_temperatura_abaixo != undefined && data.alerta_temperatura_abaixo != null)
+                    $('#temp_abaixo').val(data.alerta_temperatura_abaixo);
+
+                if (!isNaN(data.alerta_temperatura_acima) && data.alerta_temperatura_acima != undefined && data.alerta_temperatura_acima != null)
+                    $('#temp_acima').val(data.alerta_temperatura_acima);
+
+                $('#temp_abaixo').trigger('input');
+                $('#temp_acima').trigger('input');
+
+                console.log(data);
+            }
+
+            function getValues()
+            {
+                var data = {};
+
+                data.alertaChuva1 = $('.input[data-value="alerta_chuva_1"').hasClass('checked') ? 1 : 0;
+                data.alertaChuva2 = $('.input[data-value="alerta_chuva_2"').hasClass('checked') ? 1 : 0;
+                data.alertaChuva3 = $('.input[data-value="alerta_chuva_3"').hasClass('checked') ? 1 : 0;
+                data.alertaTempAcima = $('#temp_acima').val() * 1;
+                data.alertaTempAbaixo = $('#temp_abaixo').val() * 1;
+                data.userId = userId;
+
+                return data;
+            }
         }
     }
     

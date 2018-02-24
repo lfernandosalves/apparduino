@@ -45,5 +45,15 @@ var apiConnection =
         var url = apiConnection.apiUrl + '/api/medicoes/list';
         if (args.userId) url += '?user=' + args.userId;
         apiConnection.get(url, cb);
+    },
+
+    listUserConfigs: function(args, cb){
+        var url = apiConnection.apiUrl + '/api/users/configs?userId=' + args.userId;
+        apiConnection.get(url, cb);
+    },
+
+    saveUserConfigs: function(args, cb){
+        var url = apiConnection.apiUrl + '/api/users/configs';
+        apiConnection.post(url, args, cb);
     }
 };
