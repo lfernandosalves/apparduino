@@ -20,7 +20,6 @@ var phonegap_app = {
     // Application Constructor
     initialize: function() {
         this.bindEvents();
-        initializeApp();
     },
     // Bind Event Listeners
     //
@@ -35,6 +34,7 @@ var phonegap_app = {
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
         phonegap_app.receivedEvent('deviceready');
+        initializeApp();
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
@@ -67,4 +67,12 @@ function initializeApp(){
         if (action == 'logout') app.logout();
         else app.pages.show(action);
     });
+
+    alert('teste alerta');
+}
+
+
+function alert(message)
+{
+    navigator.notification.alert(message);
 }
