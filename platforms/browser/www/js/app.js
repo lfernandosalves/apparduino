@@ -6,7 +6,10 @@ app.pages = {
     home: {
         template:
             '<div class="app-page" id="page-home">'+
-                '<ul id="lista-medicoes"></ul>'+
+            '   <div class="pnl-refresh">'+
+        '           <div class="loader"></div>'+
+        '       </div>'+    
+        '       <div class="lista-container"><ul id="lista-medicoes"></ul></div>'+
             '</div>'
         ,
         initialize: function(){
@@ -23,22 +26,106 @@ app.pages = {
             ;
 
             var user = app.currentUser();
-            apiConnection.listMedicoes({userId:user.id}, function(result){
-                var medicoes = result;
-                var html = '';
-                for (var i = 0; i < medicoes.length; i++)
+            refreshMedicoes();            
+
+            function refreshMedicoes()
+            {
+                apiConnection.listMedicoes({userId:user.id}, function(result){
+                    var medicoes = result;
+                    var html = '';
+                    for (var i = 0; i < medicoes.length; i++)
+                    {
+                        var template = item_template;
+                        var medicao = medicoes[i];
+                        template = template.replace('{{sensor_nome}}', medicao.nome);
+                        template = template.replace('{{chuva}}', medicao.desc_chuva);
+                        template = template.replace('{{temp}}', medicao.valor_temperatura + ' ºC');
+                        template = template.replace('{{time}}', getFormattedDate(medicao.medicao_date));
+                        html += template
+                    }
+    
+                    $('#lista-medicoes').html(html);
+                });
+            }
+
+            
+            $('#page-home').on('scroll', function()
+            {
+                console.log('scroll page');
+            })
+
+
+            $('#main').on('scroll', function()
+            {
+                console.log('scroll main');
+            })
+
+            $('.lista-container').on('scroll', function()
+            {
+                var top = $(this).scrollTop();
+                console.log(top);
+                if (top <= 0)
+                    startListening();
+
+            })
+
+            startListening();
+
+            function startListening()
+            {    
+                var el = $('.lista-container');
+                el.on('touchstart', onStart);
+                el.on('touchend', onUp);
+
+                var yInit = 0;
+                var cY = 0;
+                var yFinal = 0;
+                var refreshOffset = 130;
+                var cancelOffset = 50;
+                var origOffset = 50;
+
+                function onStart(e)
                 {
-                    var template = item_template;
-                    var medicao = medicoes[i];
-                    template = template.replace('{{sensor_nome}}', medicao.nome);
-                    template = template.replace('{{chuva}}', medicao.desc_chuva);
-                    template = template.replace('{{temp}}', medicao.valor_temperatura + ' ºC');
-                    template = template.replace('{{time}}', getFormattedDate(medicao.medicao_date));
-                    html += template
+                    yInit = e.originalEvent.changedTouches[0].pageY;
+                    console.log('y0 -> ' + yInit);
+                    el.on('touchmove', onMove);
                 }
 
-                $('#lista-medicoes').html(html);
-            });
+                function onMove(e)
+                {
+                    var y = e.originalEvent.changedTouches[0].pageY;
+                    cY = Math.floor(y - yInit);
+                    yInit = y;
+
+                    var currentTop = (el.css('top').replace('px', '')) * 1;
+                    
+                    currentTop += cY;
+
+                    if (currentTop >= cancelOffset && currentTop <= refreshOffset)
+                        el.css('top', currentTop + 'px');
+                    console.log(currentTop);
+                }
+
+                function onUp(e)
+                {
+                    yFinal = e.originalEvent.changedTouches[0].pageY;
+                    console.log('y1 -> ' + yFinal);
+                    el.off('touchstart', onStart);
+                    el.off('touchmove', onMove);
+                    el.off('touchend', onUp);
+
+                    el.animate({'top':origOffset + 'px'}, function(){ startListening(); });
+                }
+            }
+
+            function loading(load)
+            {
+
+            }
+        },
+
+        beforeLeave:function(){
+            $(document).off('scroll');
         }
     },
 
@@ -74,12 +161,28 @@ app.pages = {
                 app.pages.show('home');
             }
            
-            $('.btn-login').click(function(){
+            $('input').on('keyup', function(e)
+            {
+                if (e && e.which == 13)
+                    tryLogin();
+            });
+
+            $('.btn-login').click(tryLogin);
+
+            function tryLogin(cb)
+            {
+                var username = $('#txt-username').val();
+                var password = $('#txt-pass').val();
+
                 $('.form-login').fadeOut('fast', function(){
                     $('.pnl-loading').fadeIn('fast');
 
-                    tryLogin(function(success){
-                        if (!success){
+                    apiConnection.login(username, password, function(userResponse){
+                        if (userResponse && userResponse.id > 0){
+                            app.currentUser(userResponse);
+                            app.pages.show('home');
+                        }
+                        else{
                             $('.login-err').show();
                             setTimeout(function() { $('.login-err').fadeOut(); }, 5000); 
                             $('#txt-username').val('');
@@ -88,29 +191,8 @@ app.pages = {
                                 $('.form-login').fadeIn('fast');
                             });
                         }
-                        else
-                            app.pages.show('home');
                     });
-                });
-            });
-
-            function tryLogin(cb){
-                var username = $('#txt-username').val();
-                var password = $('#txt-pass').val();
-
-                if (!username || username == '' || !password || password == ''){
-                    cb(false);
-                    return;
-                }
-
-                apiConnection.login(username, password, function(userResponse){
-                    if (userResponse && userResponse.id > 0){
-                        app.currentUser(userResponse);
-                        cb(true);
-                    }
-                    else
-                        cb(false);
-                });
+                });                
             }
         }
     },
@@ -171,7 +253,7 @@ app.pages = {
             apiConnection.listUserConfigs({ userId:userId },function(result)
             {
                 loading(false);
-                if (!result) alert('Ocorreu um erro.');
+                if (!result) toast('Ocorreu um erro.');
                 else showData(result);
             });
 
@@ -251,12 +333,20 @@ app.logout = function(){
     app.pages.show('login');
 }
 
+app.pages.currentPage = null;
+
 app.pages.show = function(args){
     if (typeof args == 'string')
         args = { page: args };
 
     var page = app.pages[args.page];
     var html = page.template;
+
+    if (app.pages.currentPage){
+        var currentPage = app.pages[app.pages.currentPage];
+        if (currentPage && currentPage.beforeLeave)
+            currentPage.beforeLeave();
+    }
 
     $('#app-content').fadeOut('fast', function(){
         $('#app-content').html(html);
@@ -267,6 +357,8 @@ app.pages.show = function(args){
         
         if (page.initialize)
             page.initialize();
+
+        app.pages.currentPage = args.page;
     });
 }
 

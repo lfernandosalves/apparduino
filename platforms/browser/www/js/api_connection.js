@@ -15,7 +15,7 @@ var apiConnection =
         $.ajax({
             type:'GET',
             url:args.url,
-            crossDomain:true,
+            //crossDomain:true,
             //cache:false, 
             contentType: "application/json",
             //dataType: 'jsonp',
@@ -24,6 +24,7 @@ var apiConnection =
             },
             error: function(err){
                 console.error(err);
+                toast('Ocorreu um erro, por favor tente novamente.');
                 if (cb) cb(err);
             }
         });
@@ -37,7 +38,24 @@ var apiConnection =
         }
 
         console.log('POST ' + args.url, data);
-        $.post(args.url, data, cb);
+        //$.post(args.url, data, cb);
+
+        $.ajax({
+            type:'POST',
+            url:args.url,
+            crossDomain:true,
+            //cache:false, 
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success:function(res){
+                if (cb) cb(res);
+            },
+            error: function(err){
+                console.error(err);
+                toast('Ocorreu um erro, por favor tente novamente.');
+                if (cb) cb(err);
+            }
+        });
     },
 
     login: function(username, password, cb){

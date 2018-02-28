@@ -207,10 +207,35 @@ h1 {
     padding: 20px 10px;
 }
 
+#page-home .pnl-refresh{
+    height:80px;
+    margin-top:0px;
+    border:1px solid #ccc;
+
+    transition: margin-top 200ms ease-in-out;
+    -webkit-transition: margin-top 200ms ease-in-out;
+    -moz-transition: margin-top 200ms ease-in-out;
+    -o-transition: margin-top 200ms ease-in-out;
+}
+
+#page-home .pnl-refresh.visible{
+    margin-top:0px;
+}
+
+#page-home .lista-container{
+    position:absolute;
+    top:50px;
+    left:0;
+    right:0;
+    bottom:0;
+    overflow:auto;
+}
+
+
 #page-home #lista-medicoes{
     list-style: none;
     margin:0;
-    padding:0;
+    padding:10px;
 }
 
 #page-home #lista-medicoes .item{
@@ -399,8 +424,8 @@ h1 {
   height: 8em;
 }
 .loader {
-    margin: 30px auto;
-    font-size: 6px;
+    margin: 15px auto;
+    font-size: 4px;
     position: relative;
     text-indent: -9999em;
     /* border-top: 0.9em solid rgba(81,81,81, 0.2);

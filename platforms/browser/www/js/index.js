@@ -34,6 +34,7 @@ var phonegap_app = {
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
         phonegap_app.receivedEvent('deviceready');
+        document.addEventListener("backbutton", onBackClick, true);
         initializeApp();
     },
     // Update DOM on a Received Event
@@ -68,11 +69,20 @@ function initializeApp(){
         else app.pages.show(action);
     });
 
-    alert('teste alerta');
 }
 
 
-function alert(message)
+function toast(message, callback)
 {
-    navigator.notification.alert(message);
+    window.plugins.toast.showLongCenter(message, function(res){ 
+        if (callback) callback(res); 
+    }, function(err){ if (callback) callback(err); })
+}
+
+function onBackClick()
+{
+    if (app.pages.currentPage == 'userConfigs')
+        app.pages.show('home')
+    else
+        navigator.app.exitApp();
 }
