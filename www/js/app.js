@@ -6,10 +6,10 @@ app.pages = {
     home: {
         template:
             '<div class="app-page" id="page-home">'+
-            '   <div class="pnl-refresh">'+
+            '   <div class="pnl-loading">'+
         '           <div class="loader"></div>'+
-        '       </div>'+    
-        '       <div class="lista-container"><ul id="lista-medicoes"></ul></div>'+
+        '       </div>'+
+        '       <ul id="lista-medicoes" style="display:none"></ul>'+
             '</div>'
         ,
         initialize: function(){
@@ -26,9 +26,11 @@ app.pages = {
             ;
 
             var user = app.currentUser();
-            refreshMedicoes();            
 
-            function refreshMedicoes()
+            loading(true);
+            refreshMedicoes(false, function(){ loading(false); });            
+
+            function refreshMedicoes(increment, cb)
             {
                 apiConnection.listMedicoes({userId:user.id}, function(result){
                     var medicoes = result;
@@ -43,89 +45,45 @@ app.pages = {
                         template = template.replace('{{time}}', getFormattedDate(medicao.medicao_date));
                         html += template
                     }
-    
-                    $('#lista-medicoes').html(html);
+
+                    if (increment == true)
+                        $('#lista-medicoes').append(html);
+                    else   
+                        $('#lista-medicoes').html(html);
+                    
+                    if (cb) cb();
                 });
             }
 
-            
-            $('#page-home').on('scroll', function()
-            {
-                console.log('scroll page');
-            })
-
-
-            $('#main').on('scroll', function()
-            {
-                console.log('scroll main');
-            })
-
-            $('.lista-container').on('scroll', function()
-            {
-                var top = $(this).scrollTop();
-                console.log(top);
-                if (top <= 0)
-                    startListening();
-
-            })
-
-            startListening();
-
-            function startListening()
-            {    
-                var el = $('.lista-container');
-                el.on('touchstart', onStart);
-                el.on('touchend', onUp);
-
-                var yInit = 0;
-                var cY = 0;
-                var yFinal = 0;
-                var refreshOffset = 130;
-                var cancelOffset = 50;
-                var origOffset = 50;
-
-                function onStart(e)
-                {
-                    yInit = e.originalEvent.changedTouches[0].pageY;
-                    console.log('y0 -> ' + yInit);
-                    el.on('touchmove', onMove);
-                }
-
-                function onMove(e)
-                {
-                    var y = e.originalEvent.changedTouches[0].pageY;
-                    cY = Math.floor(y - yInit);
-                    yInit = y;
-
-                    var currentTop = (el.css('top').replace('px', '')) * 1;
-                    
-                    currentTop += cY;
-
-                    if (currentTop >= cancelOffset && currentTop <= refreshOffset)
-                        el.css('top', currentTop + 'px');
-                    console.log(currentTop);
-                }
-
-                function onUp(e)
-                {
-                    yFinal = e.originalEvent.changedTouches[0].pageY;
-                    console.log('y1 -> ' + yFinal);
-                    el.off('touchstart', onStart);
-                    el.off('touchmove', onMove);
-                    el.off('touchend', onUp);
-
-                    el.animate({'top':origOffset + 'px'}, function(){ startListening(); });
-                }
-            }
+            var ptr = PullToRefresh.init({
+                mainElement: '#page-home',
+                onRefresh: function(cb){
+                    refreshMedicoes(false, cb);
+                },
+                distThreshold : 50, // Minimum distance required to trigger the refresh.
+                iconArrow: '<span class="fa fa-arrow-down"></span>', // The icon for both instructionsPullToRefresh and instructionsReleaseToRefresh
+                instructionsPullToRefresh: "Puxe para atualizar",
+                instructionsReleaseToRefresh: "Solte para atualizar",
+                instructionsRefreshing: 'Atualizando'
+            });
 
             function loading(load)
             {
-
+                var pnlLoading = $('.pnl-loading');
+                var list = $('#lista-medicoes');
+                if (load == true){
+                    list.fadeOut('fast');
+                    pnlLoading.fadeIn('fast');
+                }
+                else{
+                    pnlLoading.fadeOut('fast');
+                    list.fadeIn('fast');
+                }
             }
         },
 
         beforeLeave:function(){
-            $(document).off('scroll');
+            //$(document).off('scroll');
         }
     },
 
@@ -243,6 +201,7 @@ app.pages = {
                 var data = getValues();
                 loading(true);
                 apiConnection.saveUserConfigs(data, function(err, response){
+                    if (!err) toast('Alterações salvas com sucesso');
                     app.pages.show('userConfigs');
                 });
             });
@@ -443,12 +402,14 @@ function getFormattedDate(time) {
         month = date.getMonth()+1,
         day = date.getDate();
 
-    if (isNaN(day_diff) || day_diff < 0 || day_diff >= 31)
+    if (isNaN(day_diff) || day_diff < 0 || day_diff >= 31){
         return (
-            year.toString()+'-'
-            +((month<10) ? '0'+month.toString() : month.toString())+'-'
-            +((day<10) ? '0'+day.toString() : day.toString())
+            ((day<10) ? '0'+day.toString() : day.toString())+'/'+
+            ((month<10) ? '0'+month.toString() : month.toString()) + '/'+
+            year.toString()
         );
+    }
+        
 
     var r =
     ( 
@@ -466,5 +427,6 @@ function getFormattedDate(time) {
         || (day_diff < 7 && day_diff + " d")
         || (day_diff < 31 && Math.ceil(day_diff / 7) + " sem")
     );
+
     return r;
 }
