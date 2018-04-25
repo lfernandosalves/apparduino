@@ -74,6 +74,11 @@ var apiConnection =
         apiConnection.get(url, cb);
     },
 
+    saveUserDevice: function(args, cb) {
+        var url = apiConnection.apiUrl + '/api/notificacoes/register';
+        apiConnection.post(url, args, cb);
+    },
+
     saveUserConfigs: function(args, cb){
         var url = apiConnection.apiUrl + '/api/users/configs';
         apiConnection.post(url, args, cb);

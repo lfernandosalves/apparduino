@@ -6,10 +6,8 @@ app.pages = {
     home: {
         template:
             '<div class="app-page" id="page-home">'+
-            '   <div class="pnl-loading">'+
-        '           <div class="loader"></div>'+
-        '       </div>'+
-        '       <ul id="lista-medicoes" style="display:none"></ul>'+
+                '<div id="new-medicoes"><div id="btn-new-medicoes">Novas medições</div></div>'+
+                '<ul id="lista-medicoes" style="display:none"></ul>'+
             '</div>'
         ,
         initialize: function(){
@@ -67,6 +65,14 @@ app.pages = {
                     if (cb) cb();
                 });
             }
+
+            $('#btn-new-medicoes').click(function(){
+                $('#main').animate({ scrollTop: 0 }, 250, function(){
+                    $('#new-medicoes').removeClass('visible');
+                    loading(true);
+                    refreshMedicoes(false, function(){ loading(false); });
+                });
+            });
 
             var ptr = PullToRefresh.init({
                 mainElement: '#page-home',
@@ -177,20 +183,25 @@ app.pages = {
         '   </div>'+
         '   <div class="content">'+
         '       <div class="section"><h2>Notificações</h2>'+
+        '           <h3>Chuva</h3>'+
         '           <div class="row">'+
-        '               <span>Muita chuva</span><div class="input-container"><div class="input" data-value="alerta_chuva_1"><div class="selector"></div></div></div>'+
+        '               <span>Notificar</span><div class="input-container"><div class="input" data-value="alerta_chuva"><div class="selector"></div></div></div>'+
         '           </div>'+
         '           <div class="row">'+
-        '               <span>Chuva moderada</span><div class="input-container"><div class="input" data-value="alerta_chuva_2"><div class="selector"></div></div></div>'+
+        '               <span>Chovendo</span><div class="input-container"><div class="input" data-value="alerta_chuva_sim"><div class="selector"></div></div></div>'+
         '           </div>'+
         '           <div class="row">'+
-        '               <span>Pouca chuva</span><div class="input-container"><div class="input" data-value="alerta_chuva_3"><div class="selector"></div></div></div>'+
+        '               <span>Sem chuva</span><div class="input-container"><div class="input" data-value="alerta_chuva_nao"><div class="selector"></div></div></div>'+
+        '           </div>'+
+        '           <h3>Temperaturas</h3>'+
+        '           <div class="row">'+
+        '               <span>Notificar</span><div class="input-container"><div class="input" data-value="alerta_temperatura"><div class="selector"></div></div></div>'+
         '           </div>'+
         '           <div class="row">'+
-        '               <span>Temperaturas abaixo de: </span><div class="temp-input-container"><input id="temp_abaixo" class="temp-range" type="range" min="0" max="40" step="1" /><input class="temp-val" readonly /></div>'+
+        '               <span>Temperaturas de: </span><div class="temp-input-container"><input id="temp_de" class="temp-range" type="range" min="0" max="40" step="1" /><input class="temp-val" readonly /></div>'+
         '           </div>'+
         '           <div class="row">'+
-        '               <span>Temperaturas acima de: </span><div class="temp-input-container"><input id="temp_acima" class="temp-range" type="range" min="0" max="40" step="1"><input class="temp-val" readonly /></div>'+
+        '               <span>Temperaturas até: </span><div class="temp-input-container"><input id="temp_ate" class="temp-range" type="range" min="0" max="40" step="1"><input class="temp-val" readonly /></div>'+
         '           </div>'+
         '           <div class="btn-save">Salvar Alterações</div>'+
         '       </div>'+
@@ -202,6 +213,7 @@ app.pages = {
             $('.input').click(function()
             {
                 $(this).toggleClass('checked');
+                $(this).trigger('change');
             });
 
             $('.temp-range').on('input', function(){
@@ -247,46 +259,102 @@ app.pages = {
 
             function showData(data)
             {
-                if (data.alerta_chuva_1 == 1)
-                    $('.input[data-value="alerta_chuva_1"').addClass('checked');
+                if (data.alerta_chuva == 1)
+                    $('.input[data-value="alerta_chuva"').addClass('checked');
                 else
-                    $('.input[data-value="alerta_chuva_1"').removeClass('checked');
+                    $('.input[data-value="alerta_chuva"').removeClass('checked');
 
-                if (data.alerta_chuva_2 == 1)
-                    $('.input[data-value="alerta_chuva_2"').addClass('checked');
+                
+                updateRowsVisible('chuva', (data.alerta_chuva == 1));
+
+                if (data.alerta_chuva_sim == 1)
+                    $('.input[data-value="alerta_chuva_sim"').addClass('checked');
                 else
-                    $('.input[data-value="alerta_chuva_2"').removeClass('checked');
+                    $('.input[data-value="alerta_chuva_sim"').removeClass('checked');
 
-                if (data.alerta_chuva_3 == 1)
-                    $('.input[data-value="alerta_chuva_3"').addClass('checked');
+                if (data.alerta_chuva_nao == 1)
+                    $('.input[data-value="alerta_chuva_nao"').addClass('checked');
                 else
-                    $('.input[data-value="alerta_chuva_3"').removeClass('checked');
+                    $('.input[data-value="alerta_chuva_nao"').removeClass('checked');
 
-                if (!isNaN(data.alerta_temperatura_abaixo) && data.alerta_temperatura_abaixo != undefined && data.alerta_temperatura_abaixo != null)
-                    $('#temp_abaixo').val(data.alerta_temperatura_abaixo);
+                if (data.alerta_temperatura == 1)
+                    $('.input[data-value="alerta_temperatura"').addClass('checked');
+                else
+                    $('.input[data-value="alerta_temperatura"').removeClass('checked');
 
-                if (!isNaN(data.alerta_temperatura_acima) && data.alerta_temperatura_acima != undefined && data.alerta_temperatura_acima != null)
-                    $('#temp_acima').val(data.alerta_temperatura_acima);
 
-                $('#temp_abaixo').trigger('input');
-                $('#temp_acima').trigger('input');
+                updateRowsVisible('temperatura', (data.alerta_temperatura == 1));
 
-                console.log(data);
+                if (!isNaN(data.alerta_temperatura_de) && data.alerta_temperatura_de != undefined && data.alerta_temperatura_de != null)
+                    $('#temp_de').val(data.alerta_temperatura_de);
+
+                if (!isNaN(data.alerta_temperatura_ate) && data.alerta_temperatura_ate != undefined && data.alerta_temperatura_ate != null)
+                    $('#temp_ate').val(data.alerta_temperatura_ate);
+
+                $('#temp_de').trigger('input');
+                $('#temp_ate').trigger('input');
+
             }
 
             function getValues()
             {
                 var data = {};
 
-                data.alertaChuva1 = $('.input[data-value="alerta_chuva_1"').hasClass('checked') ? 1 : 0;
-                data.alertaChuva2 = $('.input[data-value="alerta_chuva_2"').hasClass('checked') ? 1 : 0;
-                data.alertaChuva3 = $('.input[data-value="alerta_chuva_3"').hasClass('checked') ? 1 : 0;
-                data.alertaTempAcima = $('#temp_acima').val() * 1;
-                data.alertaTempAbaixo = $('#temp_abaixo').val() * 1;
+                data.alertaChuva = $('.input[data-value="alerta_chuva"').hasClass('checked') ? 1 : 0;
+                data.alertaChuvaSim = $('.input[data-value="alerta_chuva_sim"').hasClass('checked') ? 1 : 0;
+                data.alertaChuvaNao = $('.input[data-value="alerta_chuva_nao"').hasClass('checked') ? 1 : 0;
+                data.alertaTemperatura = $('.input[data-value="alerta_temperatura"').hasClass('checked') ? 1 : 0;
+                data.alertaTemperaturaDe = $('#temp_de').val() * 1;
+                data.alertaTemperaturaAte = $('#temp_ate').val() * 1;
                 data.userId = userId;
 
                 return data;
             }
+
+            function updateRowsVisible(type, visible) {
+                if (type == 'chuva'){
+                    if (visible) {
+                        $('.input[data-value="alerta_chuva_sim"]').closest('.row').show();
+                        $('.input[data-value="alerta_chuva_nao"]').closest('.row').show();
+                    }
+                    else {
+                        $('.input[data-value="alerta_chuva_sim"]').closest('.row').hide();
+                        $('.input[data-value="alerta_chuva_nao"]').closest('.row').hide();
+                    }
+                }
+                else if (type == 'temperatura') {
+                    if (visible) {
+                        $('#temp_de').closest('.row').show();
+                        $('#temp_ate').closest('.row').show();
+                    }
+                    else{
+                        $('#temp_de').closest('.row').hide();
+                        $('#temp_ate').closest('.row').hide();
+                    }
+                }
+
+            }
+
+            $('.input[data-value="alerta_chuva"]').on('change', function(e) {
+                var checked = $(this).hasClass("checked");
+                updateRowsVisible('chuva', checked);
+            });
+
+            $('.input[data-value="alerta_temperatura"]').on('change', function(e) {
+                var checked = $(this).hasClass("checked");
+                updateRowsVisible('temperatura', checked);
+            });
+
+            $('.input[data-value="alerta_chuva"]').on('change', function(e) {
+                var checked = $(this).hasClass("checked");
+                if (checked){
+                    $('.input[data-value="alerta_chuva_sim"]').closest('.row').show();
+                    $('.input[data-value="alerta_chuva_nao"]').closest('.row').show();
+                } else {
+                    $('.input[data-value="alerta_chuva_sim"]').closest('.row').hide();
+                    $('.input[data-value="alerta_chuva_nao"]').closest('.row').hide();
+                }
+            });
         }
     }
     

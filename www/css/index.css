@@ -130,6 +130,7 @@ h1 {
     left: 0px;
     bottom: 0px;
     right: 0px;
+    overflow:auto;
 }
 
 #app-header{
@@ -231,6 +232,43 @@ h1 {
     overflow:auto;*/
 }
 
+#page-home #new-medicoes{
+    position:fixed;
+    width:100%;
+    z-index:2;
+    margin-top: -100px;
+
+    transition:margin-top 200ms ease-in-out;
+    -webkit-transition:margin-top 200ms ease-in-out;
+    -moz-transition:margin-top 200ms ease-in-out;
+    -o-transition:margin-top 200ms ease-in-out;
+}
+
+#page-home #new-medicoes.visible{
+    margin-top:14px;
+}
+
+#page-home #btn-new-medicoes{
+    width: 150px;
+    margin: auto;
+    padding: 7px 10px;
+    color: #fff;
+    text-align: center;
+    border-radius: 25px;
+
+    -webkit-box-shadow: -2px 10px 17px -8px rgba(0,0,0,0.41);
+    -moz-box-shadow: -2px 10px 17px -8px rgba(0,0,0,0.41);
+    box-shadow: -2px 10px 17px -8px rgba(0,0,0,0.41);
+
+    background: rgba(123,183,239,1);
+    background: -moz-linear-gradient(top, rgba(123,183,239,1) 0%, rgba(123,183,239,1) 23%, rgba(77,150,234,1) 65%, rgba(77,150,234,1) 100%);
+    background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(123,183,239,1)), color-stop(23%, rgba(123,183,239,1)), color-stop(65%, rgba(77,150,234,1)), color-stop(100%, rgba(77,150,234,1)));
+    background: -webkit-linear-gradient(top, rgba(123,183,239,1) 0%, rgba(123,183,239,1) 23%, rgba(77,150,234,1) 65%, rgba(77,150,234,1) 100%);
+    background: -o-linear-gradient(top, rgba(123,183,239,1) 0%, rgba(123,183,239,1) 23%, rgba(77,150,234,1) 65%, rgba(77,150,234,1) 100%);
+    background: -ms-linear-gradient(top, rgba(123,183,239,1) 0%, rgba(123,183,239,1) 23%, rgba(77,150,234,1) 65%, rgba(77,150,234,1) 100%);
+    background: linear-gradient(to bottom, rgba(123,183,239,1) 0%, rgba(123,183,239,1) 23%, rgba(77,150,234,1) 65%, rgba(77,150,234,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#7bb7ef', endColorstr='#4d96ea', GradientType=0 );
+}
 
 #page-home #lista-medicoes{
     list-style: none;

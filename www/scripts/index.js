@@ -59,11 +59,15 @@ function initializeApp(){
             
             alert('Nova medição recebida (WAS TAPPED)');
             alert(JSON.stringify(data));
+
+            $('#new-medicoes').addClass('visible');
         }else{
         //Notification was received in foreground. Maybe the user needs to be notified.
             
             alert('Nova medição recebida (WAS NOT TAPPED)');
             alert(JSON.stringify(data));
+
+            $('#new-medicoes').addClass('visible');
         }
     });
 }

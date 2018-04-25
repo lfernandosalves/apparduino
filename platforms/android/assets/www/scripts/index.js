@@ -59,27 +59,15 @@ function initializeApp(){
             
             alert('Nova medição recebida (WAS TAPPED)');
             alert(JSON.stringify(data));
-        }else{
-        //Notification was received in foreground. Maybe the user needs to be notified.
-            
-            alert('Nova medição recebida (WAS NOT TAPPED)');
-            alert(JSON.stringify(data));
-        }
-    });
 
-    FCMPlugin.onNotificationReceived(function(data){
-        alert('onNotificationReceived!');
-        
-        if(data.wasTapped){
-        //Notification was received on device tray and tapped by the user.
-            
-            alert('Nova medição recebida (WAS TAPPED)');
-            alert(JSON.stringify(data));
+            $('#new-medicoes').addClass('visible');
         }else{
         //Notification was received in foreground. Maybe the user needs to be notified.
             
             alert('Nova medição recebida (WAS NOT TAPPED)');
             alert(JSON.stringify(data));
+
+            $('#new-medicoes').addClass('visible');
         }
     });
 }
