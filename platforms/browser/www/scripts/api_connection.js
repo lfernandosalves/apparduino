@@ -1,8 +1,8 @@
 var apiConnection = 
 {
 
-    //apiUrl: 'http://localhost:5000',
-    apiUrl:'http://arduinosensort-com.umbler.net',
+    apiUrl: 'http://localhost:5000',
+    //apiUrl:'http://arduinosensort-com.umbler.net',
 
     get: function(args, cb){
         if (!args) return null;

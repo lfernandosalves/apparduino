@@ -26,6 +26,19 @@ app.pages = {
             ;
 
             var user = app.currentUser();
+            var fcm_token = localStorage.getItem('fcm_token');
+            var temp_fcm_token = localStorage.getItem('temp_fcm_token');
+
+            if (temp_fcm_token && (!fcm_token || fcm_token != temp_fcm_token)){
+                var device = { user: user.id, uuid:temp_fcm_token };
+                apiConnection.saveUserDevice(device, function(response){
+                    console.log(response);
+                    if (response && response.status == 'ok')
+                        localStorage.setItem('fcm_token', temp_fcm_token);
+                    else
+                        console.log('erro registrando device', response);
+                });
+            }
 
             loading(true);
             refreshMedicoes(false, function(){ loading(false); });            
@@ -289,6 +302,7 @@ app.currentUser = function(value){
 
 app.logout = function(){
     localStorage.removeItem('user');
+    localStorage.removeItem('fcm_token');
     app.pages.show('login');
 }
 
